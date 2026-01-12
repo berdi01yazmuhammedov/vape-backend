@@ -59,8 +59,13 @@ app.post("/api/orders", (request, response) => {
 app.get("/api/orders", (req, res) => {
   res.json(orders);
 });
+console.log("APP STARTING...");
+
 app.get("/", (req, res) => {
   res.send("Backend is alive 🚀");
+});
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
 });
 
 app.listen(PORT, () => {
