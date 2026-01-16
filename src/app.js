@@ -73,4 +73,4 @@ app.listen(PORT, () => {
   console.log(`Серверт работает на порту :${PORT}`);
 });
 console.log("SUPABASE_URL:", process.env.SUPABASE_URL?.slice(0,10), "..."); 
-console.log("SUPABASE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0,10), "...");
+console.log("SUPABASE_KEY:", process.env.SUPABASE_SECRET_KEY?.slice(0,10), "...");
