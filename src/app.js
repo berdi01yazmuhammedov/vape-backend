@@ -19,6 +19,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/vapes", vapesRoutes);
 const orders = [];
 //endpoint - 1
+app.post("/__test", (req, res) => {
+  res.json({ ok: true });
+});
 
 app.post("/api/orders", (request, response) => {
   const { items, contact, contactType, isPickup, address } = request.body;
