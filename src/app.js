@@ -1,10 +1,11 @@
-import 'dotenv/config';
+import "dotenv/config";
 import crypto from "crypto";
 import express from "express";
 import cors from "cors";
 import vapesRoutes from "./routes/vapes.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { supabase } from "./supabaseClient.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,10 +19,8 @@ const __dirname = path.dirname(__filename);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //routes
 app.use("/api/vapes", vapesRoutes);
-const orders = [];
-//endpoint - 1
 
-app.post("/api/orders", (request, response) => {
+app.post("/api/orders", async (request, response) => {
   const { items, contact, contactType, isPickup, address } = request.body;
 
   if (!Array.isArray(items) || items.length === 0) {
@@ -35,21 +34,24 @@ app.post("/api/orders", (request, response) => {
   }
   const totalPrice = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
   const order = {
     id: crypto.randomUUID(),
     items,
-    totalPrice,
+    total_price: totalPrice,
     contact,
-    contactType,
-    isPickup,
+    contact_type: contactType,
+    is_pickup: isPickup,
     address: isPickup === "Доставка" ? address : null,
     status: "Новый",
-    createdAt: new Date().toLocaleString(),
   };
-  orders.push(order);
 
+  const { error } = await supabase.from("orders").insert(order);
+
+  if (error) {
+    return response.status(500).json({ error: error.message });
+  }
   console.log("Пришел заказ: ", order);
 
   response.status(201).json({
@@ -57,8 +59,16 @@ app.post("/api/orders", (request, response) => {
   });
 });
 
-app.get("/api/orders", (req, res) => {
-  res.json(orders);
+app.get("/api/orders", async (req, res) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+  res.json(data);
 });
 console.log("APP STARTING...");
 
@@ -72,5 +82,3 @@ process.on("uncaughtException", (err) => {
 app.listen(PORT, () => {
   console.log(`Серверт работает на порту :${PORT}`);
 });
-console.log("SUPABASE_URL:", process.env.SUPABASE_URL?.slice(0,10), "..."); 
-console.log("SUPABASE_KEY:", process.env.SUPABASE_SECRET_KEY?.slice(0,10), "...");
