@@ -43,3 +43,15 @@ export const getOrders = async (req, res) => {
 
   res.json(data);
 };
+
+export const deleteOrder = async (req, res) => {
+    const {id} = req.params;
+    const {error} = await supabase
+    .from("orders")
+    .delete()
+    .eq("id", id);
+    if(error){
+        return res.status(500).json({message: error.message});
+    }
+    res.json({ok: true});
+}
